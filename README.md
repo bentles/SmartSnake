@@ -7,3 +7,5 @@ Made in conjunction with
 - Scott Wait
 - Mohammad Haspatel
 - Morne Barnard
+
+Original protoype snake.js requires node.js
