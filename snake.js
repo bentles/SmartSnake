@@ -571,8 +571,8 @@ function FFNN_builder(num_in,
 }
 
 function GA_builder(pop_size, tourn_percent, std_dev, mutate_chance) {
-    var vision = 1;
-    var nnet = FFNN_builder( /*5 * 3*/ + 12 * vision + 4,
+    var vision = 2;
+    var nnet = FFNN_builder( /*5 * 3*/ 12 * vision + 4,
                             6, function(net){return net;},
                             3, function(net){return net;});
     var game = snake_game_builder(20, 10, 3, vision, nnet);
@@ -580,6 +580,8 @@ function GA_builder(pop_size, tourn_percent, std_dev, mutate_chance) {
     var max_fit = -Number.MAX_VALUE;
     var max_fit_chromo = [];
     var fitnesses = [];
+    var fitness_stagnation = 500;
+    var fitness_stagnation_count = fitness_stagnation;
 
     function create_first_gen() {
         var chromosome_size = nnet.size();
@@ -594,9 +596,13 @@ function GA_builder(pop_size, tourn_percent, std_dev, mutate_chance) {
 
     function calc_fitnesses()
     {
+        var cont = true;
+        var new_max = false;
+        
         for(var i = 0; i < chromosomes.length; i++) {
             nnet.set(chromosomes[i]);
 
+           
             var score = 0;
             
             var num_runs = 5;            
@@ -607,11 +613,24 @@ function GA_builder(pop_size, tourn_percent, std_dev, mutate_chance) {
             fitnesses[i] = score / num_runs;            
 
             if (fitnesses[i] > max_fit) {
+                fitness_stagnation_count = fitness_stagnation;
+                
                 max_fit = fitnesses[i];
                 max_fit_chromo = chromosomes[i];
                 console.log("NEW MAX FITNESS! " + fitnesses[i]);
+                new_max = true;
             }
         }
+
+        //no new max found for fitness_stagnation gens then we give up
+        if (!new_max) {
+            fitness_stagnation_count--;
+            if (!fitness_stagnation_count)            
+                cont = false;
+            
+        }
+
+        return cont;
     }
 
     function tourn_select() {
@@ -638,7 +657,7 @@ function GA_builder(pop_size, tourn_percent, std_dev, mutate_chance) {
     function next_gen()
     {
         var children = [];
-        calc_fitnesses();
+        var cont = calc_fitnesses();
 
         while(children.length < chromosomes.length) {
             var p1 = tourn_select();
@@ -647,6 +666,8 @@ function GA_builder(pop_size, tourn_percent, std_dev, mutate_chance) {
             children = children.concat(siblings);           
         }
         chromosomes = children;
+
+        return cont; //propagate signal to kill GA because it's not learning anything
     }
 
     function crossover_mutate(p1, p2) {
@@ -676,12 +697,12 @@ function GA_builder(pop_size, tourn_percent, std_dev, mutate_chance) {
     }
 
     function evolve(iter) {
+        var totalgens = iter;
         create_first_gen();
 
-        while(iter--) {
-            next_gen();
+        while(next_gen() && iter--) {            
             if (iter % 100 == 0) {
-                console.log("NEW GEN: " + max_fit);
+                console.log("NEW GEN (" + (totalgens - iter)  + "): " + max_fit);
             }
         }
         return max_fit_chromo;
@@ -697,6 +718,6 @@ function GA_builder(pop_size, tourn_percent, std_dev, mutate_chance) {
 }
 
 //20 0.5 2.5 0.01
-var ga = GA_builder(20, 0.5, 2.5, 0.01); //pop_size, tourn_percent, std_dev, mutate_chance
-var chromo = ga.evolve(10000);
+var ga = GA_builder(20, 0.5, 2.5, 0.005); //pop_size, tourn_percent, std_dev, mutate_chance
+var chromo = ga.evolve(3000);
 ga.play_best(50);
