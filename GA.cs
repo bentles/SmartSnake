@@ -48,6 +48,7 @@ namespace SnakeConsole
             StdDev = 0.50;
             SelectMod = 0.10;
             NumRuns = 30;
+
             // INITIALIZE VARIABLES            
             SnakeGame = (Game)snake;
             NeuralNet = snake.GetNN();
@@ -63,7 +64,6 @@ namespace SnakeConsole
             ShuffleArray(shuffled); // SHUFFLE IT ONCE BEFORE USE
 
         }// GA
-
         // ===========================================================================================
         // METHODS - PUBLIC     
 
@@ -135,7 +135,7 @@ namespace SnakeConsole
                     double[] parent2 = Population[idxParent2];
             
                     // CROSSOVER
-                    Children = Crossover( parent1, parent2 );
+                    Children = SBXCrossover( parent1, parent2 );
                     // MUTATION
                     if (rand.NextDouble() < ProbMutate)
                         Children[0] = MutateGauss(0.05, Children[0]);
@@ -262,8 +262,17 @@ namespace SnakeConsole
             return individual;
         }// MUTATEGAUSS
 
-        private double[][] Crossover(double[] Parent1, double[] Parent2)
-        {// SBX CROSSOVER - WITH A CUSTOM FIX
+        private double[][] CoinFlipCrossover(double[] Parent1, double[] Parent2)
+        {
+            double[][] Children = new double[2][];
+            Children[0] = new double[Genes];
+            Children[1] = new double[Genes];
+
+            return Children;
+        }
+
+        private double[][] SBXCrossover(double[] Parent1, double[] Parent2)
+        {// SBX CROSSOVER
             double[][] Children = new double[2][];
             Children[0] = new double[Genes];
             Children[1] = new double[Genes];

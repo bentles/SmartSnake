@@ -11,7 +11,7 @@ namespace SnakeConsole
 		static void Main(string[] args)
 		{
 			//make a game
-			Game game = new Game(20, 10, 3, 1, true);
+			Game game = new Game(20, 10, 3);
 			//make a ga and give it a game
             GA ga = new GA(game, 50);
             // SET PROPERTIES
