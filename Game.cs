@@ -35,6 +35,7 @@ namespace SnakeConsole
         float ttl_scale = 1f;
         int HP;
         int vision;
+        bool smell;
 
         //apple
         Vector2 apple;
@@ -42,26 +43,17 @@ namespace SnakeConsole
         //score
         int score = 0;
 
-        //properties
-        public int Vision {
-            get { return vision; } 
-            set {
-                if (value < 1)
-                    throw new ArgumentOutOfRangeException("Vision must be 1 or more. No blind snakes allowed.");
-                vision = value; 
-            } 
-        }
-        public bool Smell { get; set; }
-
-        public Game(int width, int height, int snake_length)
+        public Game(int width, int height, int snake_length, int vision, bool smell)
         {
-            vision = 1;
-            Smell = true;  
+            if (vision < 1)
+                throw new ArgumentOutOfRangeException("vision must be 1 or more");                
 
             //snake properties
+            this.vision = vision;
+            this.smell = smell;
             this.snake_length = snake_length;
             snake_length_count = snake_length;
-            controller = new FFNN(vision * 12 + (Smell ? 4 : 0), 6, 3);
+            controller = new FFNN(vision * 12 + (smell ? 4 : 0), 6, 3);
 
             //board properties
             this.width = width;
@@ -124,7 +116,7 @@ namespace SnakeConsole
                 inputs.AddRange(right);
             }
 
-            if (Smell)
+            if (smell)
             {
                 Vector2 rel_apple_pos = getPosRelativeToSnake(apple);
                 List<int> pos_expanded = new List<int> { 0, 0, 0, 0 };
