@@ -13,7 +13,7 @@ namespace SnakeConsole
 			//make a game
 			Game game = new Game(20, 10, 3, 1, true);
 			//make a ga and give it a game
-            GA ga = new GA(game, 20);
+            GA ga = new GA(game, 30);
             // SET PROPERTIES
             ga.NumRuns = 5;
             ga.ProbMutate = 0.005;

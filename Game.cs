@@ -68,7 +68,7 @@ namespace SnakeConsole
 			AddApple();
 			score = 0;
 			snake_length_count = snake_length;
-            ttl = (int)((width -2) * (height - 2) * ttl_scale);
+            ttl = (int)((width - 2) * (height - 2) * ttl_scale);
             HP = ttl;
 		}
 

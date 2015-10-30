@@ -134,8 +134,8 @@ namespace SnakeConsole
                 while (count < PopSize)
                 {
                     // SELECTION FOR REPRODUCTION                
-                    idxParent1 = Tournament(TournSize);
-                    idxParent2 = Tournament(TournSize);
+                    idxParent1 = ReplaceTournament(TournSize);
+                    idxParent2 = ReplaceTournament(TournSize);
                     double[] parent1 =  Population[idxParent1];
                     double[] parent2 = Population[idxParent2];
             
@@ -200,7 +200,25 @@ namespace SnakeConsole
             }
         }// INITIALPOP
 
-        private int Tournament(int Size)
+        private int ReplaceTournament (int Size)
+        {
+            double maxfit = 0;
+            int maxfitpos = 0;
+
+            for (int i = 0; i < Size; i++)
+            {
+                int index = rand.Next(PopSize);
+                if (Fitnesses[index] > maxfit)
+                {
+                    maxfit = Fitnesses[index];
+                    maxfitpos = index;
+                }
+            }
+
+            return maxfitpos;
+        }
+
+        private int NoReplaceTournament(int Size)
         {// RETURN THE INDECIES OF THE CHOSEN PARENTS
             int[] pool = new int[Size];
             double max = 0;
@@ -261,14 +279,14 @@ namespace SnakeConsole
                 double Range = geneRange[0, g] - geneRange[1, g];
                 if (rand.NextDouble() < prob)
                 {// if gene is to mutate                                    
-                    individual[g] = individual[g] - RandomGaussian.NextGaussian() * StdDev; //* Range;      
+                    individual[g] = individual[g] + RandomGaussian.NextGaussian() * StdDev; //* Range;      
                 }
             }
             return individual;
         }// MUTATEGAUSS
 
         private double[][] CoinTossCrossover(double[] Parent0, double[] Parent1)
-        {// SBX CROSSOVER
+        {// COIN TOSS CROSSOVER
             double[][] Children = new double[2][];
             Children[0] = new double[Genes];
             Children[1] = new double[Genes];
