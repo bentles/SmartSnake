@@ -13,14 +13,14 @@ namespace SnakeConsole
 			//make a game
 			Game game = new Game(20, 10, 3, 1, true);
 			//make a ga and give it a game
-            GA ga = new GA(game, 50);
+            GA ga = new GA(game, 20);
             // SET PROPERTIES
             ga.NumRuns = 5;
-            ga.ProbMutate = 0.5;
-            ga.StdDev = 1d;
-            ga.SelectMod = 0.30d;
+            ga.ProbMutate = 0.005;
+            ga.StdDev = 2.5d;
+            ga.SelectMod = 0.50d;
 			//train ga for 1000 iterations
-			ga.TrainFor(1000);
+			ga.TrainFor(3000);
 			//give game correct controller for best chromosome
 			ga.SetUpBestGame();
 			//display the game

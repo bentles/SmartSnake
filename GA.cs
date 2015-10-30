@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace SnakeConsole
 {
+    enum CrossoverType { SBX, CoinToss }
+    enum MutationType { Uniform, Guassian }
+
     class GA
     {
         // ===========================================================================================
@@ -29,6 +32,7 @@ namespace SnakeConsole
 
         // ===========================================================================================
         // PROPERTIES
+        public double ProbCrossover { get; set; }
         public double ProbMutate { get; set; }
         public double StdDev { get; set; }
         public double SelectMod { get; set; }
@@ -44,6 +48,7 @@ namespace SnakeConsole
         public GA( Game snake, int pop_size ) 
         {
             // DEFAULT PROPERTY VALUES
+            ProbCrossover = 0.5;
             ProbMutate = 0.05;
             StdDev = 0.50;
             SelectMod = 0.10;
@@ -135,12 +140,12 @@ namespace SnakeConsole
                     double[] parent2 = Population[idxParent2];
             
                     // CROSSOVER
-                    Children = Crossover( parent1, parent2 );
+                    Children = CoinTossCrossover( parent1, parent2 );
                     // MUTATION
                     if (rand.NextDouble() < ProbMutate)
-                        Children[0] = MutateGauss(0.05, Children[0]);
+                        Children[0] = MutateGauss(ProbMutate, Children[0]);
                     if (rand.NextDouble() < ProbMutate)
-                        Children[1] = MutateGauss(0.05, Children[1]);
+                        Children[1] = MutateGauss(ProbMutate, Children[1]);
                     
                     //REPOPULATION
                     var family = new List<Tuple<double, double[]>>();
@@ -262,8 +267,30 @@ namespace SnakeConsole
             return individual;
         }// MUTATEGAUSS
 
-        private double[][] Crossover(double[] Parent1, double[] Parent2)
-        {// SBX CROSSOVER - WITH A CUSTOM FIX
+        private double[][] CoinTossCrossover(double[] Parent0, double[] Parent1)
+        {// SBX CROSSOVER
+            double[][] Children = new double[2][];
+            Children[0] = new double[Genes];
+            Children[1] = new double[Genes];
+
+            for (int i = 0; i < Genes; i++)
+            {
+                if (rand.NextDouble() > ProbCrossover)
+                {
+                    Children[0][i] = Parent0[i];
+                    Children[1][i] = Parent1[i];
+                }
+                else
+                {
+                    Children[0][i] = Parent1[i];
+                    Children[1][i] = Parent0[i];
+                }
+            }
+            return Children;
+        }
+
+        private double[][] SBXCrossover(double[] Parent1, double[] Parent2)
+        {// SBX CROSSOVER
             double[][] Children = new double[2][];
             Children[0] = new double[Genes];
             Children[1] = new double[Genes];
