@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using RandomGen;
 
 namespace SnakeConsole
 {
@@ -25,6 +24,15 @@ namespace SnakeConsole
         private int[] shuffled;
         private int iShuffled;
         private double[,] geneRange;// [0,] = MAX + [1,] = min
+        double bestHOFFit = 0;
+        int bestHOFIdx = 0;
+
+        // ===========================================================================================
+        // PROPERTIES
+        public double ProbMutate { get; set; }
+        public double StdDev { get; set; }
+        public double SelectMod { get; set; }
+        public int NumRuns { get; set; }
 
         // ===========================================================================================
         //  CONSTRUCTOR
@@ -36,10 +44,10 @@ namespace SnakeConsole
         public GA( Game snake, int pop_size ) 
         {
             // DEFAULT PROPERTY VALUES
-            ProbMutate = (float)0.05;
-            StdDev = (float)0.50;
-            SelectMod = (float)0.10;
-            NumRuns = (int)30;
+            ProbMutate = 0.05;
+            StdDev = 0.50;
+            SelectMod = 0.10;
+            NumRuns = 30;
             // INITIALIZE VARIABLES            
             SnakeGame = (Game)snake;
             NeuralNet = snake.GetNN();
@@ -55,13 +63,6 @@ namespace SnakeConsole
             ShuffleArray(shuffled); // SHUFFLE IT ONCE BEFORE USE
 
         }// GA
-
-        // ===========================================================================================
-        // PROPERTIES
-        public double ProbMutate { get; set; }
-        public double StdDev { get; set; }
-        public double SelectMod { get; set; }
-        public int NumRuns { get; set; }
 
         // ===========================================================================================
         // METHODS - PUBLIC     
@@ -118,6 +119,12 @@ namespace SnakeConsole
                 HOF[t] = (double[])Population[bestIdx].Clone(); // might be pass by reference???
                 HOF_fit[t] = Fitnesses[bestIdx];
 
+                if (Fitnesses[bestIdx] > bestHOFFit)
+                {
+                    bestHOFFit = Fitnesses[bestIdx];
+                    bestHOFIdx = t;
+                }
+
                 count = 0;
                 while (count < PopSize)
                 {
@@ -149,26 +156,16 @@ namespace SnakeConsole
 
                 }// WHILE
                 Population = (double[][])NewPop.Clone();
-                Console.WriteLine(HOF_fit[t]);
+                Console.Clear();
+                Console.WriteLine("Current Gen's Best: " + HOF_fit[t] + " (" + t + "/" + generations + ")" );
+                Console.WriteLine("Best Ever: " + bestHOFFit);
             }//END T
             
         }// TRAINFOR
 
         public void SetUpBestGame()
         {/* something like: game.getNN, NN.setweights(bestchromo); */               
-            // RETURN BEST INDIVIDUAL
-            double max = 0;
-            int idx = 0;
-            for (int i = 0; i < HOF_fit.Length; i++)
-            {
-                if ( HOF_fit[i] > max)
-                {
-                    max = HOF_fit[i];
-                    idx = i;
-                }               
-            }// FOR I
-            NeuralNet.SetWeights( HOF[idx] );
-            // I assumed that the Game obj was passed by refernce!!!
+            NeuralNet.SetWeights( HOF[bestHOFIdx] );
         }// SETUPBESTGAME
                 
         // ===========================================================================================
@@ -181,7 +178,7 @@ namespace SnakeConsole
             {
                 sum += SnakeGame.Run();
             }
-            return (double)( sum /*/ NumRuns */);
+            return sum / NumRuns;
         }// FITNESS
 
         // ===========================================================================================

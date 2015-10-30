@@ -11,7 +11,7 @@ namespace SnakeConsole
     class Game
     {
         Random rand = new Random();
-
+       
         public Vector2 N = new Vector2(0, -1);
         public Vector2 S = new Vector2(0, 1);
         public Vector2 E = new Vector2(1, 0);

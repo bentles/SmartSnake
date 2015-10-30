@@ -16,7 +16,7 @@ namespace SnakeConsole
             GA ga = new GA(game, 50);
             // SET PROPERTIES
             ga.NumRuns = 5;
-            ga.ProbMutate = 0.8;
+            ga.ProbMutate = 0.5;
             ga.StdDev = 1d;
             ga.SelectMod = 0.30d;
 			//train ga for 1000 iterations

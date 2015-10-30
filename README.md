@@ -1,7 +1,7 @@
 # SmartSnake
 A GA that trains a NN to play snake
 
-Requires System.Numerics.Vectors 
+Requires System.Numerics.Vectors 4.0.0
 
 Made in conjunction with
 - Scott Wait
