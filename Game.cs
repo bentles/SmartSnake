@@ -33,7 +33,9 @@ namespace SnakeConsole
         FFNN controller;  
         int ttl; //how many turns the snake gets to live without an apple before dying
         float ttl_scale = 1f;
-        int hunger;
+        int HP;
+        int vision;
+        bool smell;
 
         //apple
         Vector2 apple;
@@ -41,14 +43,22 @@ namespace SnakeConsole
         //score
         int score = 0;
 
-        public Game(int width, int height, int snake_length)
+        public Game(int width, int height, int snake_length, int vision, bool smell)
         {
+            if (vision < 1)
+                throw new ArgumentOutOfRangeException("vision must be 1 or more");                
+
+            //snake properties
+            this.vision = vision;
+            this.smell = smell;
             this.snake_length = snake_length;
             snake_length_count = snake_length;
+            controller = new FFNN(vision * 12 + (smell ? 4 : 0), 6, 3);
+
+            //board properties
             this.width = width;
             this.height = height;
             board = new Entity[width, height];
-            controller = new FFNN(40, 6, 3);
         }
 
 		public void Reset()
@@ -59,7 +69,7 @@ namespace SnakeConsole
 			score = 0;
 			snake_length_count = snake_length;
             ttl = (int)((width -2) * (height - 2) * ttl_scale);
-            hunger = ttl;
+            HP = ttl;
 		}
 
         public void Play(int millisecs)
@@ -95,7 +105,7 @@ namespace SnakeConsole
             //get blocks next to snake
              List<int> inputs = new List<int>();
 
-            for (int i = 1; i <= 3; i++)
+            for (int i = 1; i <= vision; i++)
             {
                 List<int> forwards = getExpandedEntity(new Vector2(0, 1*i));
                 List<int> left = getExpandedEntity(new Vector2(-1*i, 0));
@@ -106,20 +116,23 @@ namespace SnakeConsole
                 inputs.AddRange(right);
             }
 
-            Vector2 rel_apple_pos = getPosRelativeToSnake(apple);
-            List<int> pos_expanded = new List<int>{0,0,0,0};
+            if (smell)
+            {
+                Vector2 rel_apple_pos = getPosRelativeToSnake(apple);
+                List<int> pos_expanded = new List<int> { 0, 0, 0, 0 };
 
-            if (rel_apple_pos.X < 0)
-                pos_expanded[0] = -(int)rel_apple_pos.X;
-            else
-                pos_expanded[1] = (int)rel_apple_pos.X;
+                if (rel_apple_pos.X < 0)
+                    pos_expanded[0] = -(int)rel_apple_pos.X;
+                else
+                    pos_expanded[1] = (int)rel_apple_pos.X;
 
-            if (rel_apple_pos.Y < 0)
-                pos_expanded[2] = -(int)rel_apple_pos.Y;
-            else
-                pos_expanded[3] = (int)rel_apple_pos.Y;
+                if (rel_apple_pos.Y < 0)
+                    pos_expanded[2] = -(int)rel_apple_pos.Y;
+                else
+                    pos_expanded[3] = (int)rel_apple_pos.Y;
 
-            inputs.AddRange(pos_expanded);
+                inputs.AddRange(pos_expanded);
+            }
 
             controller.SetInputs(inputs);
             double[] outputs = controller.GetOutputs();
@@ -221,7 +234,7 @@ namespace SnakeConsole
         bool MoveGrowSnake(LocalDirections direction)
         {
             //snake slowly dies of hunger each turn
-            hunger--;
+            HP--;
 
             Vector2 pos; 
             switch (direction)
@@ -254,7 +267,7 @@ namespace SnakeConsole
 				{
                     AddApple();
 					score += 100;
-                    hunger = ttl;
+                    HP = ttl;
 				}
 
                 if (snake_length_count > 1)
@@ -263,7 +276,7 @@ namespace SnakeConsole
 
             snake[0] = pos;
 
-            if ((board[(int)pos.X, (int)pos.Y] == Entity.snake) || (board[(int)pos.X, (int)pos.Y] == Entity.wall) || hunger == 0)
+            if ((board[(int)pos.X, (int)pos.Y] == Entity.snake) || (board[(int)pos.X, (int)pos.Y] == Entity.wall) || HP == 0)
             {
                 board[(int)pos.X, (int)pos.Y] = Entity.dead;
                 return false;
