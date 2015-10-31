@@ -143,21 +143,14 @@ namespace SnakeConsole
                     Children = CoinTossCrossover( parent1, parent2 );
                     // MUTATION
                     if (rand.NextDouble() < ProbMutate)
-                        Children[0] = MutateGauss(ProbMutate, Children[0]);
+                        MutateGauss(ProbMutate, Children[0]);
                     if (rand.NextDouble() < ProbMutate)
-                        Children[1] = MutateGauss(ProbMutate, Children[1]);
+                        MutateGauss(ProbMutate, Children[1]);
                     
                     //REPOPULATION
-                    var family = new List<Tuple<double, double[]>>();
-                    family.Add(new Tuple<double,double[]>(EvalFitness(Children[0]), Children[0]));
-                    family.Add(new Tuple<double,double[]>(EvalFitness(Children[1]), Children[1]));
-                    family.Add(new Tuple<double, double[]>(Fitnesses[idxParent1], parent1));
-                    family.Add(new Tuple<double, double[]>(Fitnesses[idxParent2], parent2));
+                    NewPop[count++] = Children[0];
+                    NewPop[count++] = Children[1];
 
-                    family.Sort((a, b) => { return a.Item1.CompareTo(b.Item1); });
-
-                    NewPop[count++] = family[2].Item2;
-                    NewPop[count++] = family[3].Item2;
 
                 }// WHILE
                 Population = (double[][])NewPop.Clone();
@@ -254,7 +247,7 @@ namespace SnakeConsole
             return list;
         }// SHUFFLEARRAY
 
-        private double[] MutateUniform(double[] individual)
+        private void MutateUniform(double[] individual)
         {// I would rather implement a Gaussian version of this
             //double[] Mutant = new double[Genes];
             for (int g = 0; g < Genes; g++)
@@ -269,20 +262,18 @@ namespace SnakeConsole
                     individual[g] = individual[g] + ( individual[g] - geneRange[1, g] );
                 } 
             }
-            return individual;
         }// MUTATEUNIFORM
 
-        private double[] MutateGauss( double prob, double[] individual)
+        private void MutateGauss( double prob, double[] individual)
         {
             for (int g = 0; g < Genes; g++)
             {   
                 double Range = geneRange[0, g] - geneRange[1, g];
                 if (rand.NextDouble() < prob)
                 {// if gene is to mutate                                    
-                    individual[g] = individual[g] + RandomGaussian.NextGaussian() * StdDev; //* Range;      
+                    individual[g] += RandomGaussian.NextGaussian() * StdDev; //* Range;      
                 }
             }
-            return individual;
         }// MUTATEGAUSS
 
         private double[][] CoinTossCrossover(double[] Parent0, double[] Parent1)
